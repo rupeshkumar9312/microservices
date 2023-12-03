@@ -1,0 +1,40 @@
+eureka:
+    client:
+        serviceUrl:
+            defaultZone: http://localhost:8761/eureka
+server:
+    port: 8081
+spring:
+    application:
+        name: api-gateway
+    cloud:
+        gateway:
+            routes:
+            -   id: product-service
+                predicates:
+                - Path=/api/products
+                uri: lb://product-service
+            -   id: order-service
+                predicates:
+                - Path=/api/orders
+                uri: lb://order-service
+            -   filters:
+                - SetPath=/
+                id: discovery-service
+                predicates:
+                - Path=/eureka/web
+                uri: http://localhost:8761
+            -   id: discovery-service-static
+                predicates:
+                - Path=/eureka/**
+                uri: http://localhost:8761
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    issuer-uri: http://localhost:8080/realms/Microservices-realm
+    zipkin:
+        base-url: http://localhost:9411
+    sleuth:
+        sampler:
+            probability: 1.0
